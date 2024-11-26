@@ -1,18 +1,50 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/**
- * This component destroys its object whenever it triggers a 2D collider with the given tag.
- */
 public class DestroyOnTrigger2D : MonoBehaviour {
-    [Tooltip("Every object tagged with this tag will trigger the destruction of this object")]
+    [Tooltip("Every object tagged with this tag will count toward the destruction of this object")]
     [SerializeField] string triggeringTag;
+
+    [Tooltip("Number of collisions required to destroy the object")]
+    [SerializeField] int maxCollisions = 3; 
+
+    private int collisionCount = 0; 
+
+    private SpriteRenderer spriteRenderer;
+
+    private void Start() {
+       
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.tag == triggeringTag && enabled) {
-            Destroy(this.gameObject);
-            Destroy(other.gameObject);
+            collisionCount++; 
+
+            Destroy(other.gameObject); 
+
+           
+            if (collisionCount < maxCollisions) {
+                PerformActionOnCollision(); 
+            }
+
+           
+            if (collisionCount >= maxCollisions) {
+                Destroy(this.gameObject);
+            }
         }
+    }
+
+    private void PerformActionOnCollision() {
+        
+        if (spriteRenderer != null) {
+            float damageRatio = (float)collisionCount / maxCollisions;
+            spriteRenderer.color = Color.Lerp(Color.white, Color.red, damageRatio); 
+        }
+    }
+
+    private void Update() {
+       
     }
 }
